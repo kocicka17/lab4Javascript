@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Лабораторна робота №4 — Варіант 19 (Судноплавство)</title>
+</head>
+<body>
+    <h2>Лабораторна робота №4 — Варіант 19 («Судноплавство»)</h2>
+    <p>Відкрийте консоль розробника (<b>F12</b> → <b>Console</b>), щоб переглянути результати виконання всіх завдань.</p>
+
+    <script>
+        
+        class Repository {
+            #items = [];
+            #lastId = 0;
+
+            constructor() {
+                this.#items = [];
+                this.#lastId = 0;
+            }
+
+            create(item) {
+                item.id = ++this.#lastId;
+                this.#items.push(item);
+                return item;
+            }
+
+            readById(id) {
+                return this.#items.find(item => item.id === id);
+            }
+
+            readAll() {
+                return [...this.#items];
+            }
+
+            printAll() {
+                this.#items.forEach(item => item.printToConsole());
+            }
+
+            update(id, changes) {
+                const item = this.readById(id);
+                if (item) {
+                    Object.assign(item, changes);
+                }
+                return item;
+            }
+
+            delete(id) {
+                this.#items = this.#items.filter(item => item.id !== id);
+            }
+        }
+
+       
+        class Ship {
+            constructor(data) {
+                this.name = data.name;
+                this.homePort = data.homePort;
+                this.type = data.type;
+                this.displacement = data.displacement;
+                this.captain = data.captain;
+            }
+
+            printToConsole() {
+                console.log(`Корабель [ID: ${this.id}]: Назва: "${this.name}", Порт приписки: ${this.homePort}, Тип: ${this.type}, Водотоннажність: ${this.displacement}, Капітан: ${this.captain}`);
+            }
+        }
+
+        
+        class Port {
+            constructor(data) {
+                this.name = data.name;
+                this.country = data.country;
+                this.dailyFee = data.dailyFee;
+                this.category = data.category;
+            }
+
+            printToConsole() {
+                console.log(`Порт [ID: ${this.id}]: Назва: "${this.name}", Країна: ${this.country}, Ціна дня: ${this.dailyFee}$, Категорія: ${this.category}`);
+            }
+        }
+
+        
+        class Visit {
+            constructor(data) {
+                this.shipId = data.shipId;
+                this.portId = data.portId;
+                this.berthNumber = data.berthNumber;
+                this.purpose = data.purpose;
+                this.departureDate = data.departureDate;
+                this.arrivalDate = data.arrivalDate;
+                this.cargoPurpose = data.cargoPurpose;
+                this.customsStatus = data.customsStatus;
+            }
+
+            printToConsole() {
+                console.log(`Відвідування [ID: ${this.id}]: Корабель ID:${this.shipId} -> Порт ID:${this.portId}, Причал №${this.berthNumber}, Мета: ${this.purpose}, В'їзд: ${this.arrivalDate}, Виїзд: ${this.departureDate}, Статус митниці: ${this.customsStatus}`);
+            }
+        }
+
+       
+        const shipRepository = new Repository();
+        const portRepository = new Repository();
+        const visitRepository = new Repository();
+
+        
+        shipRepository.create(new Ship({ name: "Одеса", homePort: "Одеса", type: "Контейнеровоз", displacement: "45000т", captain: "Петренко В.І." }));
+        shipRepository.create(new Ship({ name: "Чорноморськ", homePort: "Іллічівськ", type: "Танкер", displacement: "60000т", captain: "Коваленко С.М." }));
+        shipRepository.create(new Ship({ name: "Гетьман Сагайдачний", homePort: "Одеса", type: "Фрегат", displacement: "3500т", captain: "Шевченко П.П." }));
+
+        portRepository.create(new Port({ name: "Порт Стамбул", country: "Туреччина", dailyFee: 1200, category: "Міжнародний" }));
+        portRepository.create(new Port({ name: "Порт Пірей", country: "Греція", dailyFee: 1500, category: "Вузловий" }));
+        portRepository.create(new Port({ name: "Порт Констанца", country: "Румунія", dailyFee: 950, category: "Регіональний" }));
+
+        
+        visitRepository.create(new Visit({ shipId: 1, portId: 1, berthNumber: 12, purpose: "Розвантаження", departureDate: "2026-05-12", arrivalDate: "2026-05-10", cargoPurpose: "Зерно", customsStatus: "Пройдено" }));
+        visitRepository.create(new Visit({ shipId: 2, portId: 2, berthNumber: 5, purpose: "Бункероування", departureDate: "2026-06-03", arrivalDate: "2026-06-01", cargoPurpose: "Паливо", customsStatus: "Очікування" }));
+        visitRepository.create(new Visit({ shipId: 1, portId: 2, berthNumber: 8, purpose: "Технічний огляд", departureDate: "2026-07-18", arrivalDate: "2026-07-15", cargoPurpose: "Обладнання", customsStatus: "Пройдено" }));
+
+        
+        console.log("=== КОРАБЛІ (Ships): ===");
+        shipRepository.printAll();
+
+        console.log("\n=== ПОРТИ (Ports): ===");
+        portRepository.printAll();
+
+        console.log("\n=== ВІДВІДУВАННЯ (Visits): ===");
+        visitRepository.printAll();
+
+       
+        console.log("\n=== ЗАВДАННЯ 4: Зв'язок 'багато до багатьох' (Корабель ID:1 у різних портах) ===");
+        for (const visit of visitRepository.readAll()) {
+            if (visit.shipId === 1) {
+                const port = portRepository.readById(visit.portId);
+                console.log(`Корабель 'Одеса' відвідав порт: ${port.name} (${port.country}), Мета: ${visit.purpose}, Статус: ${visit.customsStatus}`);
+            }
+        }
+
+       
+        console.log("\n=== ЗАВДАННЯ 5: CRUD-операції на репозиторії відвідувань (Visits) ===");
+        
+        console.log("1. Додавання нового відвідування (CREATE):");
+        visitRepository.create(new Visit({ shipId: 3, portId: 3, berthNumber: 3, purpose: "Поповнення запасів", departureDate: "2026-08-11", arrivalDate: "2026-08-10", cargoPurpose: "Продукти", customsStatus: "Пройдено" }));
+        visitRepository.printAll();
+
+        console.log("\n2. Читання за ID (READ BY ID - запит ID: 2):");
+        console.log(visitRepository.readById(2));
+
+        console.log("\n3. Оновлення запису (UPDATE - зміна статусу для ID: 2):");
+        visitRepository.update(2, { customsStatus: "Успішно завершено", purpose: "Заправка і ремонт" });
+        visitRepository.readById(2).printToConsole();
+
+        console.log("\n4. Видалення запису (DELETE - видалення ID: 3):");
+        visitRepository.delete(3);
+        console.log("Фінальний перелік відвідувань після видалення:");
+        visitRepository.printAll();
+    </script>
+</body>
+</html>
